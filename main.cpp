@@ -57,12 +57,15 @@ custom_math::vector_3 grav_acceleration(const custom_math::vector_3& pos, const 
 
 float normalized_double_to_float(const double d)
 {
+	if (d <= 0.0)
+		return 0.0f;
+	else if (d >= 1.0)
+		return 1.0f;
+
+//	const float max_val = nextafterf(1.0f, -1.0f);
 	float tempf = 0.0f;
 
-	//static const float max_val = nextafterf(1.0f, -1.0f);
-	//static const double dbl_max_val = nextafter(1.0, -1.0);
-
-	while (tempf < d && tempf < 1.0f)
+	while (tempf < d)
 		tempf += nextafterf(tempf, 1.0f);
 
 	return tempf;
@@ -82,12 +85,16 @@ void proceed_Euler(custom_math::vector_3& pos, custom_math::vector_3& vel, const
 	float betaf2 = normalized_double_to_float(beta);
 
 	if (betaf1 != betaf2)
+	{
 		cout << "mismatch: " << betaf1 << " " << betaf2 << endl;
+	}
+
+
 
 	custom_math::vector_3 accel = grav_acceleration(pos, vel, G);
 
 	vel += accel * dt * alpha;
-	pos += vel * dt * beta;
+	pos += vel * dt * betaf2;
 }
 
 
@@ -98,7 +105,7 @@ void idle_func(void)
 {
 	frame_count++;
 
-	const long double dt = 10;// 5e-6 * (speed_of_light / mercury_vel.length());
+	const long double dt = 1;// 5e-6 * (speed_of_light / mercury_vel.length());
 
 	custom_math::vector_3 last_pos = mercury_pos;
 
