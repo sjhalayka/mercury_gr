@@ -59,8 +59,8 @@ float normalized_double_to_float(const double d)
 {
 	float tempf = 0.0f;
 
-	static const float max_val = nextafterf(1.0f, -1.0f);
-	static const double dbl_max_val = nextafter(1.0, -1.0);
+	//static const float max_val = nextafterf(1.0f, -1.0f);
+	//static const double dbl_max_val = nextafter(1.0, -1.0);
 
 	while (tempf < d && tempf < 1.0f)
 		tempf += nextafterf(tempf, 1.0f);
