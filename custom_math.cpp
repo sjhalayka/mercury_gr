@@ -2,7 +2,7 @@
 #include "custom_math.h"
 
 
-custom_math::vector_3::vector_3(const MyBig &src_x, const MyBig &src_y, const MyBig &src_z)
+custom_math::vector_3::vector_3(const long double &src_x, const long double &src_y, const long double &src_z)
 {
 	x = src_x;
 	y = src_y;
@@ -30,12 +30,28 @@ void custom_math::vector_3::zero(void)
 	x = y = z = 0;
 }
 
-void custom_math::vector_3::rotate_z(const MyBig &radians)
+void custom_math::vector_3::rotate_x(const long double &radians)
 {
-    MyBig t_x = x;
+	long double t_y = y;
+
+	y = t_y*cos(radians) + z*sin(radians);
+	z = t_y*-sin(radians) + z*cos(radians);
+}
+
+void custom_math::vector_3::rotate_y(const long double &radians)
+{
+	long double t_x = x;
+
+	x = t_x*cos(radians) + z*-sin(radians);
+	z = t_x*sin(radians) + z*cos(radians);
+}
+
+void custom_math::vector_3::rotate_z(const long double &radians)
+{
+    long double t_x = x;
     
-    x = t_x*Cos(radians) + y*-Sin(radians);
-    y = t_x*Sin(radians) + y*Cos(radians);
+    x = t_x*cos(radians) + y*-sin(radians);
+    y = t_x*sin(radians) + y*cos(radians);
 }
 
 custom_math::vector_3 custom_math::vector_3::operator+(const vector_3 &rhs)
@@ -53,12 +69,12 @@ custom_math::vector_3 custom_math::vector_3::operator*(const vector_3 &rhs)
 	return vector_3(x*rhs.x, y*rhs.y, z*rhs.z);
 }
 
-custom_math::vector_3 custom_math::vector_3::operator*(const MyBig &rhs)
+custom_math::vector_3 custom_math::vector_3::operator*(const long double &rhs)
 {
 	return vector_3(x*rhs, y*rhs, z*rhs);
 }
 
-custom_math::vector_3 custom_math::vector_3::operator/(const MyBig &rhs)
+custom_math::vector_3 custom_math::vector_3::operator/(const long double &rhs)
 {
 	return vector_3(x/rhs, y/rhs, z/rhs);
 }
@@ -83,7 +99,7 @@ custom_math::vector_3 &custom_math::vector_3::operator*=(const vector_3 &rhs)
 	return *this;
 }
 
-custom_math::vector_3 &custom_math::vector_3::operator*=(const MyBig &rhs)
+custom_math::vector_3 &custom_math::vector_3::operator*=(const long double &rhs)
 {
 	x *= rhs; y *= rhs; z *= rhs;
 	return *this;
@@ -99,14 +115,14 @@ custom_math::vector_3 custom_math::vector_3::operator-(void)
 	return temp;
 }
 
-MyBig custom_math::vector_3::length(void) const
+long double custom_math::vector_3::length(void) const
 {
-	return Sqrt(self_dot());
+	return sqrt(self_dot());
 }
 
 custom_math::vector_3 &custom_math::vector_3::normalize(void)
 {
-	MyBig len = length();
+	long double len = length();
 
 	if(len != 1)
 	{
@@ -118,12 +134,12 @@ custom_math::vector_3 &custom_math::vector_3::normalize(void)
 	return *this;
 }
 
-MyBig custom_math::vector_3::dot(const vector_3 &rhs) const
+long double custom_math::vector_3::dot(const vector_3 &rhs) const
 {
 	return x*rhs.x + y*rhs.y + z*rhs.z;
 }
 
-MyBig custom_math::vector_3::self_dot(void) const
+long double custom_math::vector_3::self_dot(void) const
 {
 	return x*x + y*y + z*z;
 }
@@ -140,3 +156,18 @@ custom_math::vector_3 custom_math::vector_3::cross(const vector_3 &rhs) const
 
 
 
+
+long double custom_math::d(const long double &a, const long double &b)
+{
+	return fabs(a - b);
+}
+
+long double custom_math::d_3(const vector_3 &a, const vector_3 &b)
+{
+	return sqrt((a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y) + (a.z - b.z)*(a.z - b.z));
+}
+
+long double custom_math::d_3_sq(const vector_3 &a, const vector_3 &b)
+{
+	return (a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y) + (a.z - b.z)*(a.z - b.z);
+}

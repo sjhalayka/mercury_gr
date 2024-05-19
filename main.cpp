@@ -4,13 +4,16 @@
 #define USE_OPENGL
 
 
-
-
 #include "main.h"
+
+#include <string>
+using std::to_string;
 
 int main(int argc, char** argv)
 {
 	cout << setprecision(20) << endl;
+
+
 
 
 #ifndef USE_OPENGL
@@ -24,10 +27,6 @@ int main(int argc, char** argv)
 #endif
 
 #ifdef USE_OPENGL
-
-	// Push back the initial position
-	positions.push_back(mercury_pos);
-
 	glutInit(&argc, argv);
 	init_opengl(win_x, win_y);
 	glutReshapeFunc(reshape_func);
@@ -45,94 +44,11 @@ int main(int argc, char** argv)
 	return 0;
 }
 
-
-//
-//float normalized_double_to_float(const double d)
-//{
-//	if (d <= 0.0)
-//		return 0.0f;
-//	else if (d >= 1.0)
-//		return 1.0f;
-//
-//	const float df = static_cast<float>(d);
-//	float tempf = nexttowardf(1.0f, df);
-//
-//	while (tempf > df)
-//		tempf = nexttowardf(tempf, df);
-//
-//	return tempf;
-//}
-
-
-
-//
-//float normalized_double_to_float(const double d)
-//{
-//	if (d <= 0.0)
-//		return 0.0f;
-//	else if (d >= 1.0)
-//		return 1.0f;
-//
-//	const float df = static_cast<float>(d);
-//	float tempf = nexttowardf(1.0f, df);
-//
-//	while (tempf > df)
-//		tempf = nexttowardf(tempf, df);
-//
-//	return tempf;
-//}
-//
-//float normalized_double_to_float(const double d)
-//{
-//	if (d <= 0.0)
-//		return 0.0f;
-//	else if (d >= 1.0)
-//		return 1.0f;
-//
-//	ostringstream oss;
-//	oss << setprecision(20) << d;
-//
-//	float df = 0;
-//
-//	istringstream iss(oss.str());
-//	iss >> df;
-//
-//	float tempf = nexttowardf(1.0f, df);
-//
-//	while (tempf > df)
-//		tempf = nexttowardf(tempf, df);
-//
-//	return tempf;
-//}
-
-
-
-
-float normalized_double_to_float(const double d)
-{
-	if (d <= 0.0)
-		return 0.0f;
-	else if (d >= 1.0)
-		return 1.0f;
-
-	ostringstream oss;
-	oss << setprecision(20) << d;
-
-	float df = 0;
-
-	istringstream iss(oss.str());
-	iss >> df;
-
-	return df;
-}
-
-
-
-custom_math::vector_3 grav_acceleration(const custom_math::vector_3& pos, const custom_math::vector_3& vel, const MyBig G)
+custom_math::vector_3 grav_acceleration(const custom_math::vector_3& pos, const custom_math::vector_3& vel, const long double G)
 {
 	custom_math::vector_3 grav_dir = sun_pos - pos;
 
-	const MyBig distance = grav_dir.length();
+	const double distance = grav_dir.length();
 	grav_dir.normalize();
 
 	custom_math::vector_3 accel = grav_dir * G * sun_mass / (distance * distance);
@@ -140,35 +56,80 @@ custom_math::vector_3 grav_acceleration(const custom_math::vector_3& pos, const 
 	return accel;
 }
 
-void proceed_Euler(custom_math::vector_3& pos, custom_math::vector_3& vel, const MyBig G, const MyBig dt)
+//
+//double normalized_double_to_float(const double d, const size_t significant_places)
+//{
+//	if (d <= 0.0)
+//		return 0.0f;
+//	else if (d >= 1.0)
+//		return 1.0f;
+//
+//	ostringstream oss;
+//	oss << std::fixed << setprecision(significant_places) << d;
+//
+//	istringstream iss(oss.str());
+//
+//	double x = 0;
+//	iss >> x;
+//
+//	return x;
+//}
+
+
+
+float normalized_double_to_float(const double d, const size_t significant_places)
 {
-	const custom_math::vector_3 grav_dir = sun_pos - pos;
-	const MyBig distance = grav_dir.length();
+	if (d <= 0.0)
+		return 0.0f;
+	else if (d >= 1.0)
+		return 1.0f;
 
-	static const MyBig two = 2;
-	static const MyBig one = 1;
+	ostringstream oss;
+	oss << std::fixed << setprecision(significant_places) << d;
 
-	const MyBig Rs = two * grav_constant * sun_mass / (speed_of_light * speed_of_light);
-	const MyBig alpha = two - Sqrt(one - (vel.length() * vel.length()) / (speed_of_light * speed_of_light));
-	const MyBig beta = Sqrt(one - Rs / distance);
+	istringstream iss(oss.str());
 
-	const float betaf = normalized_double_to_float(beta.ToDouble());
+	float x = 0;
+	iss >> x;
+
+	return x;
+}
+
+
+
+void proceed_Euler(custom_math::vector_3& pos, custom_math::vector_3& vel, const long double G, const long double dt)
+{
+	const custom_math::vector_3 grav_dir = sun_pos - pos;	
+	const double distance = grav_dir.length();
+	const double Rs = 2 * grav_constant * sun_mass / (speed_of_light * speed_of_light);
+
+	const double alpha = 2.0 - sqrt(1 - (vel.length() * vel.length()) / (speed_of_light * speed_of_light));
+
+	double beta = sqrt(1.0 - Rs / distance);
+
+	//float betaf1 = static_cast<float>(beta);
+	float beta2 = normalized_double_to_float(beta, 9);
+
+	//if (betaf1 != betaf2)
+	//{
+	//	cout << "mismatch: " << betaf1 << " " << betaf2 << endl;
+	//}
 
 	custom_math::vector_3 accel = grav_acceleration(pos, vel, G);
 
 	vel += accel * dt * alpha;
-	pos += vel * dt * betaf;
+	pos += vel * dt * beta2;
 }
 
 
-MyBig total = 0;
+long double total = 0;
 long unsigned int frame_count = 0;
 
 void idle_func(void)
 {
 	frame_count++;
 
-	static const MyBig dt = 0.01;// (speed_of_light / mercury_vel.length()) * 1e-5;
+	const long double dt = 0.01;// 5e-6 * (speed_of_light / mercury_vel.length());
 
 	custom_math::vector_3 last_pos = mercury_pos;
 
@@ -177,7 +138,7 @@ void idle_func(void)
 
 	if (decreasing)
 	{
-		if (mercury_pos.length() > last_pos.length() && frame_count > 1)
+		if (mercury_pos.length() > last_pos.length())
 		{
 			// hit perihelion
 			cout << "hit perihelion" << endl;
@@ -197,9 +158,9 @@ void idle_func(void)
 			custom_math::vector_3 current_dir = last_pos;
 			current_dir.normalize();
 
-			const MyBig d = current_dir.dot(previous_dir);
+			const long double d = current_dir.dot(previous_dir);
 
-			const MyBig angle = ACos(d);
+			const long double angle = acos(d);
 			previous_dir = current_dir;
 
 			custom_math::vector_3 temp_pos = last_pos;
@@ -210,11 +171,10 @@ void idle_func(void)
 			else
 				total -= angle;
 
-			const MyBig avg = total / orbit_count;
+			const long double avg = total / orbit_count;
 
-			static const MyBig one = 1.0;
-			static const MyBig num_orbits_per_earth_century = 365.0 / 88.0 * 100;
-			static const MyBig to_arcseconds = one / (pi / (180.0 * 3600.0));
+			static const long double num_orbits_per_earth_century = 365.0 / 88.0 * 100;
+			static const long double to_arcseconds = 1.0 / (pi / (180.0 * 3600.0));
 
 			cout << "orbit " << orbit_count << endl;
 			cout << "dot   " << d << endl;
@@ -233,12 +193,14 @@ void idle_func(void)
 	}
 
 #ifdef USE_OPENGL
+
 	if (frame_count % 100000 == 0)
 	{
 		positions.push_back(mercury_pos);
-		//cout << "redisplay" << endl;
+
 		glutPostRedisplay();
 	}
+
 #endif
 }
 
@@ -268,10 +230,10 @@ void init_opengl(const int& width, const int& height)
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
-	glClearColor(background_colour.x.ToDouble(), background_colour.y.ToDouble(), background_colour.z.ToDouble(), 1);
+	glClearColor(background_colour.x, background_colour.y, background_colour.z, 1);
 	glClearDepth(1.0f);
 
-	main_camera.Set(0, 0, camera_w.ToDouble(), camera_fov.ToDouble(), win_x, win_y, camera_near.ToDouble(), camera_far.ToDouble());
+	main_camera.Set(0, 0, camera_w, camera_fov, win_x, win_y, camera_near, camera_far);
 }
 
 void reshape_func(int width, int height)
@@ -289,7 +251,7 @@ void reshape_func(int width, int height)
 	glutReshapeWindow(win_x, win_y);
 	glViewport(0, 0, win_x, win_y);
 
-	main_camera.Set(main_camera.u, main_camera.v, main_camera.w, main_camera.fov, win_x, win_y, camera_near.ToDouble(), camera_far.ToDouble());
+	main_camera.Set(main_camera.u, main_camera.v, main_camera.w, main_camera.fov, win_x, win_y, camera_near, camera_far);
 }
 
 // Text drawing code originally from "GLUT Tutorial -- Bitmap Fonts and Orthogonal Projections" by A R Fernandes
@@ -311,17 +273,19 @@ void draw_objects(void)
 	glPushMatrix();
 
 
-	glPointSize(6.0);
+	glPointSize(1.0);
 	glLineWidth(1.0);
 
 
 	glBegin(GL_POINTS);
-	glVertex3f(sun_pos.x.ToFloat(), sun_pos.y.ToFloat(), sun_pos.z.ToFloat());
+	glVertex3f(sun_pos.x, sun_pos.y, sun_pos.z);
+	glEnd();
 
+	glBegin(GL_LINE_STRIP);
 	glColor3f(1.0, 1.0, 1.0);
 
 	for (size_t i = 0; i < positions.size(); i++)
-		glVertex3d(positions[i].x.ToFloat(), positions[i].y.ToFloat(), positions[i].z.ToFloat());
+		glVertex3d(positions[i].x, positions[i].y, positions[i].z);
 
 	glEnd();
 
@@ -385,7 +349,7 @@ void display_func(void)
 		glPushMatrix();
 		glLoadIdentity();
 
-		glColor3f(control_list_colour.x.ToFloat(), control_list_colour.y.ToFloat(), control_list_colour.z.ToFloat());
+		glColor3f(control_list_colour.x, control_list_colour.y, control_list_colour.z);
 
 		size_t break_size = 22;
 		size_t start = 20;
@@ -477,26 +441,24 @@ void motion_func(int x, int y)
 	mouse_x = x;
 	mouse_y = y;
 
-	//int mouse_delta_x = mouse_x - prev_mouse_x;
-	//int mouse_delta_y = prev_mouse_y - mouse_y;
+	int mouse_delta_x = mouse_x - prev_mouse_x;
+	int mouse_delta_y = prev_mouse_y - mouse_y;
 
-	//if (true == lmb_down && (0 != mouse_delta_x || 0 != mouse_delta_y))
-	//{
-	//	MyBig temp_spacer = u_spacer * mouse_delta_y;
+	if (true == lmb_down && (0 != mouse_delta_x || 0 != mouse_delta_y))
+	{
+		main_camera.u -= static_cast<float>(mouse_delta_y) * u_spacer;
+		main_camera.v += static_cast<float>(mouse_delta_x) * v_spacer;
+	}
+	else if (true == rmb_down && (0 != mouse_delta_y))
+	{
+		main_camera.w -= static_cast<float>(mouse_delta_y) * w_spacer;
 
-	//	//main_camera.u -= temp_spacer;
-	//	//main_camera.v += mouse_delta_x * v_spacer;
-	//}
-	//else if (true == rmb_down && (0 != mouse_delta_y))
-	//{
-	//	//main_camera.w -= static_cast<float>(mouse_delta_y) * w_spacer;
+		if (main_camera.w < 1.1f)
+			main_camera.w = 1.1f;
 
-	//	//if (main_camera.w < 1.1f)
-	//	//	main_camera.w = 1.1f;
+	}
 
-	//}
-
-	//main_camera.Set(); // Calculate new camera vectors.
+	main_camera.Set(); // Calculate new camera vectors.
 }
 
 void passive_motion_func(int x, int y)
