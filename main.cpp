@@ -6,6 +6,8 @@
 
 #include "main.h"
 
+#include <string>
+using std::to_string;
 
 int main(int argc, char** argv)
 {
@@ -55,6 +57,8 @@ custom_math::vector_3 grav_acceleration(const custom_math::vector_3& pos, const 
 }
 
 
+
+
 float normalized_double_to_float(const double d)
 {
 	if (d <= 0.0)
@@ -62,18 +66,66 @@ float normalized_double_to_float(const double d)
 	else if (d >= 1.0)
 		return 1.0f;
 
-//	const float max_val = nextafterf(1.0f, -1.0f);
-	float tempf = 0.0f;
+	ostringstream oss;
+	oss << setprecision(20) << d;
 
-	while (tempf < d)
-		tempf += nextafterf(tempf, 1.0f);
+	float df = 0;
 
-	return tempf;
+	istringstream iss(oss.str());
+	iss >> df;
+
+	//float tempf = nexttowardf(1.0f, df);
+
+	//while (tempf > df)
+	//	tempf = nexttowardf(tempf, df);
+
+	return df;// tempf;
 }
+
+
+//float normalized_double_to_float(const double d)
+//{
+//	if (d <= 0.0)
+//		return 0.0f;
+//	else if (d >= 1.0)
+//		return 1.0f;
+//
+//	//const float df = static_cast<float>(d);
+//	float tempf = nexttowardf(1.0f, d);
+//
+//	while (tempf > d)
+//		tempf = nexttowardf(tempf, d);
+//
+//	return tempf;
+//}
+
+
+//
+//float normalized_double_to_float(const double d)
+//{
+//	if (d <= 0.0)
+//		return 0.0f;
+//	else if (d >= 1.0)
+//		return 1.0f;
+//
+//	float tempf = nexttowardf(1.0f, d);
+//	double tempd = nexttowardf(1.0, d);
+//
+//	while (tempd > d)
+//	{
+//		//tempd = nexttowardf(tempd, d);
+//		tempf = nexttowardf(tempf, d);
+//		tempd = (double)tempf;
+//	}
+//
+//	return tempf;
+//}
+
+
 
 void proceed_Euler(custom_math::vector_3& pos, custom_math::vector_3& vel, const long double G, const long double dt)
 {
-	const custom_math::vector_3 grav_dir = sun_pos - pos;
+	const custom_math::vector_3 grav_dir = sun_pos - pos;	
 	const double distance = grav_dir.length();
 	const double Rs = 2 * grav_constant * sun_mass / (speed_of_light * speed_of_light);
 
@@ -86,10 +138,8 @@ void proceed_Euler(custom_math::vector_3& pos, custom_math::vector_3& vel, const
 
 	if (betaf1 != betaf2)
 	{
-		cout << "mismatch: " << betaf1 << " " << betaf2 << endl;
+		//cout << "mismatch: " << betaf1 << " " << betaf2 << endl;
 	}
-
-
 
 	custom_math::vector_3 accel = grav_acceleration(pos, vel, G);
 
@@ -105,7 +155,7 @@ void idle_func(void)
 {
 	frame_count++;
 
-	const long double dt = 1;// 5e-6 * (speed_of_light / mercury_vel.length());
+	const long double dt = 0.01;// 5e-6 * (speed_of_light / mercury_vel.length());
 
 	custom_math::vector_3 last_pos = mercury_pos;
 
@@ -170,10 +220,11 @@ void idle_func(void)
 
 #ifdef USE_OPENGL
 
-	if (frame_count % 10000 == 0)
+	if (frame_count % 100000 == 0)
 	{
-		glutPostRedisplay();
 		positions.push_back(mercury_pos);
+
+		glutPostRedisplay();
 	}
 
 #endif
