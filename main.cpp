@@ -76,8 +76,34 @@ custom_math::vector_3 grav_acceleration(const custom_math::vector_3& pos, const 
 //}
 
 
+//
+//double normalized_double_to_float(const double d, const size_t significant_places)
+//{
+//	if (d <= 0.0)
+//		return 0.0;
+//	else if (d >= 1.0)
+//		return 1.0;
+//
+//	ostringstream oss;
+//	oss << std::fixed << setprecision(20) << d;
+//
+//	string s = oss.str();
+//
+//	s.resize(2 + significant_places);
+//
+//	istringstream iss(s);
+//
+//	double x = 0;
+//	iss >> x;
+//
+//	return x;
+//}
 
-float normalized_double_to_float(const double d, const size_t significant_places)
+
+
+
+
+double normalized_double_to_float(const double d)
 {
 	if (d <= 0.0)
 		return 0.0f;
@@ -85,15 +111,21 @@ float normalized_double_to_float(const double d, const size_t significant_places
 		return 1.0f;
 
 	ostringstream oss;
-	oss << std::fixed << setprecision(significant_places) << d;
+	oss << std::fixed << setprecision(20) << d;
+
+	float df = 0;
 
 	istringstream iss(oss.str());
+	iss >> df;
 
-	float x = 0;
-	iss >> x;
+	float tempf = nexttowardf(1.0f, df);
 
-	return x;
+	while (tempf > df)
+		tempf = nexttowardf(tempf, df);
+
+	return static_cast<double>(tempf);
 }
+
 
 
 
@@ -107,13 +139,19 @@ void proceed_Euler(custom_math::vector_3& pos, custom_math::vector_3& vel, const
 
 	double beta = sqrt(1.0 - Rs / distance);
 
-	//float betaf1 = static_cast<float>(beta);
-	float beta2 = normalized_double_to_float(beta, 9);
+	float betaf1 = static_cast<float>(beta);
+	double beta2 = normalized_double_to_float(beta);
 
-	//if (betaf1 != betaf2)
-	//{
-	//	cout << "mismatch: " << betaf1 << " " << betaf2 << endl;
-	//}
+	//if (beta < 1.0 && beta2 == 1.0)
+	//	beta2 = 1.0 - numeric_limits<float>::epsilon();
+
+
+	//cout << betaf1 << " " << beta2 << endl;
+
+	if (betaf1 != beta2)
+	{
+		cout << "mismatch: " << betaf1 << " " << beta2 << endl;
+	}
 
 	custom_math::vector_3 accel = grav_acceleration(pos, vel, G);
 
