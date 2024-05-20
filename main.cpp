@@ -58,13 +58,18 @@ custom_math::vector_3 grav_acceleration(const custom_math::vector_3& pos, const 
 
 double truncate_normalized_double(const double d)
 {
+	return static_cast<double>(static_cast<float>(d));
+
+
+
+
 	if (d <= 0.0)
 		return 0.0f;
 	else if (d >= 1.0)
 		return 1.0f;
 
 	ostringstream oss;
-	oss << std::fixed << setprecision(20) << d;
+	oss << std::fixed << setprecision(9) << d;
 
 	float df = 0;
 
@@ -78,6 +83,90 @@ double truncate_normalized_double(const double d)
 
 	return static_cast<double>(tempf);
 }
+
+
+
+// todo: test symplectic4 where dt = 0.01
+
+
+void proceed_symplectic4(custom_math::vector_3& pos, custom_math::vector_3& vel, long double G, long double dt)
+{
+	static double const cr2 = pow(2.0, 1.0 / 3.0);
+
+	static const double c[4] =
+	{
+		1.0 / (2.0 * (2.0 - cr2)),
+		(1.0 - cr2) / (2.0 * (2.0 - cr2)),
+		(1.0 - cr2) / (2.0 * (2.0 - cr2)),
+		1.0 / (2.0 * (2.0 - cr2))
+	};
+
+	static const double d[4] =
+	{
+		1.0 / (2.0 - cr2),
+		-cr2 / (2.0 - cr2),
+		1.0 / (2.0 - cr2),
+		0.0
+	};
+
+	{
+		const custom_math::vector_3 grav_dir = sun_pos - pos;
+		const double distance = grav_dir.length();
+		const double Rs = 2 * grav_constant * sun_mass / (speed_of_light * speed_of_light);
+
+		const double alpha = 2.0 - sqrt(1 - (vel.length() * vel.length()) / (speed_of_light * speed_of_light));
+
+		const double beta = sqrt(1.0 - Rs / distance);
+		const double beta_truncated = truncate_normalized_double(beta);
+
+		pos += vel * c[0] * dt * beta_truncated;
+		vel += grav_acceleration(pos, vel, G) * d[0] * dt * alpha;
+	}
+
+	{
+		const custom_math::vector_3 grav_dir = sun_pos - pos;
+		const double distance = grav_dir.length();
+		const double Rs = 2 * grav_constant * sun_mass / (speed_of_light * speed_of_light);
+
+		const double alpha = 2.0 - sqrt(1 - (vel.length() * vel.length()) / (speed_of_light * speed_of_light));
+
+		const double beta = sqrt(1.0 - Rs / distance);
+		const double beta_truncated = truncate_normalized_double(beta);
+
+		pos += vel * c[1] * dt * beta_truncated;
+		vel += grav_acceleration(pos, vel, G) * d[1] * dt * alpha;
+	}
+
+	{
+		const custom_math::vector_3 grav_dir = sun_pos - pos;
+		const double distance = grav_dir.length();
+		const double Rs = 2 * grav_constant * sun_mass / (speed_of_light * speed_of_light);
+
+		const double alpha = 2.0 - sqrt(1 - (vel.length() * vel.length()) / (speed_of_light * speed_of_light));
+
+		const double beta = sqrt(1.0 - Rs / distance);
+		const double beta_truncated = truncate_normalized_double(beta);
+
+		pos += vel * c[2] * dt * beta_truncated;
+		vel += grav_acceleration(pos, vel, G) * d[2] * dt * alpha;
+	}
+
+	{
+		const custom_math::vector_3 grav_dir = sun_pos - pos;
+		const double distance = grav_dir.length();
+		const double Rs = 2 * grav_constant * sun_mass / (speed_of_light * speed_of_light);
+
+		const double alpha = 2.0 - sqrt(1 - (vel.length() * vel.length()) / (speed_of_light * speed_of_light));
+
+		const double beta = sqrt(1.0 - Rs / distance);
+		const double beta_truncated = truncate_normalized_double(beta);
+
+		pos += vel * c[3] * dt * beta_truncated;
+		//	vel += grav_acceleration(pos, vel, G) * d[3] * dt * alpha; // last element d[3] is always 0
+	}
+}
+
+
 
 
 
@@ -111,8 +200,12 @@ void idle_func(void)
 
 	custom_math::vector_3 last_pos = mercury_pos;
 
-	proceed_Euler(mercury_pos, mercury_vel, grav_constant, dt);
+//	proceed_Euler(mercury_pos, mercury_vel, grav_constant, dt);
+	proceed_symplectic4(mercury_pos, mercury_vel, grav_constant, dt);
 
+	custom_math::vector_3 next_pos = mercury_pos;
+	custom_math::vector_3 next_vel = mercury_vel;
+	proceed_symplectic4(next_pos, next_vel, grav_constant, dt);
 
 	if (decreasing)
 	{
@@ -126,7 +219,10 @@ void idle_func(void)
 	}
 	else
 	{
-		if (mercury_pos.length() < last_pos.length())
+		if (mercury_pos.length() > last_pos.length()
+			&&
+			mercury_pos.length() > next_pos.length()
+			&& frame_count > 1)
 		{
 			// hit aphelion
 			cout << "hit aphelion" << endl;
@@ -167,6 +263,8 @@ void idle_func(void)
 			positions.clear();
 #endif
 			decreasing = true;
+
+			exit(0);
 		}
 	}
 
