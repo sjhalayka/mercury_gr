@@ -179,7 +179,13 @@ void proceed_Euler(custom_math::vector_3& pos, custom_math::vector_3& vel, const
 	const double alpha = 2.0 - sqrt(1 - (vel.length() * vel.length()) / (speed_of_light * speed_of_light));
 
 	const double beta = sqrt(1.0 - Rs / distance);
+
+	const float beta_float = static_cast<float>(beta);
 	const double beta_truncated = truncate_normalized_double(beta);
+
+	if (beta_float != beta_truncated)
+		cout << "mismatch" << endl;
+
 
 	custom_math::vector_3 accel = grav_acceleration(pos, vel, G);
 
@@ -195,17 +201,17 @@ void idle_func(void)
 {
 	frame_count++;
 
-	const long double dt = 0.1;
+	const long double dt = 1;
 
 	custom_math::vector_3 last_pos = mercury_pos;
 
-	// proceed_Euler(mercury_pos, mercury_vel, grav_constant, dt);
-	proceed_symplectic4(mercury_pos, mercury_vel, grav_constant, dt);
+	proceed_Euler(mercury_pos, mercury_vel, grav_constant, dt);
+	//proceed_symplectic4(mercury_pos, mercury_vel, grav_constant, dt);
 
 	custom_math::vector_3 next_pos = mercury_pos;
 	custom_math::vector_3 next_vel = mercury_vel;
-	// proceed_Euler(mercury_pos, mercury_vel, grav_constant, dt);
-	proceed_symplectic4(next_pos, next_vel, grav_constant, dt);
+	proceed_Euler(next_pos, next_vel, grav_constant, dt);
+	//proceed_symplectic4(next_pos, next_vel, grav_constant, dt);
 
 	if (decreasing)
 	{
