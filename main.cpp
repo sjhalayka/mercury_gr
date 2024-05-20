@@ -86,7 +86,6 @@ double truncate_normalized_double(const double d)
 
 
 
-// todo: test symplectic4 where dt = 0.01
 
 
 void proceed_symplectic4(custom_math::vector_3& pos, custom_math::vector_3& vel, long double G, long double dt)
@@ -196,15 +195,11 @@ void idle_func(void)
 {
 	frame_count++;
 
-	const long double dt = 0.01;// 5e-6 * (speed_of_light / mercury_vel.length());
+	const long double dt = 0.1;// 5e-6 * (speed_of_light / mercury_vel.length());
 
 	custom_math::vector_3 last_pos = mercury_pos;
 
-
-		proceed_Euler(mercury_pos, mercury_vel, grav_constant, dt);
-
-
-	//proceed_symplectic4(mercury_pos, mercury_vel, grav_constant, dt);
+	proceed_symplectic4(mercury_pos, mercury_vel, grav_constant, dt);
 
 	custom_math::vector_3 next_pos = mercury_pos;
 	custom_math::vector_3 next_vel = mercury_vel;
