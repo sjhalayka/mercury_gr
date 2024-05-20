@@ -44,6 +44,11 @@ int main(int argc, char** argv)
 	return 0;
 }
 
+
+
+
+
+
 custom_math::vector_3 grav_acceleration(const custom_math::vector_3& pos, const custom_math::vector_3& vel, const long double G)
 {
 	custom_math::vector_3 grav_dir = sun_pos - pos;
@@ -56,9 +61,26 @@ custom_math::vector_3 grav_acceleration(const custom_math::vector_3& pos, const 
 	return accel;
 }
 
+
+
+
+
+double precision(double f, int places)
+{
+	double n = std::pow(10.0, places);
+	return std::round(f * n) / n;
+}
+
+
 double truncate_normalized_double(const double d)
 {
-	return static_cast<double>(static_cast<float>(d));
+	double x = d;// precision(d, 10);
+
+	return static_cast<double>(static_cast<float>(x));
+
+
+
+//	return static_cast<double>(static_cast<float>(d));
 
 
 
@@ -201,17 +223,17 @@ void idle_func(void)
 {
 	frame_count++;
 
-	const long double dt = 1;
-
+	const long double dt = 0.1;
+	 
 	custom_math::vector_3 last_pos = mercury_pos;
 
-	proceed_Euler(mercury_pos, mercury_vel, grav_constant, dt);
-	//proceed_symplectic4(mercury_pos, mercury_vel, grav_constant, dt);
+	//proceed_Euler(mercury_pos, mercury_vel, grav_constant, dt);
+	proceed_symplectic4(mercury_pos, mercury_vel, grav_constant, dt);
 
 	custom_math::vector_3 next_pos = mercury_pos;
 	custom_math::vector_3 next_vel = mercury_vel;
-	proceed_Euler(next_pos, next_vel, grav_constant, dt);
-	//proceed_symplectic4(next_pos, next_vel, grav_constant, dt);
+	//proceed_Euler(next_pos, next_vel, grav_constant, dt);
+	proceed_symplectic4(next_pos, next_vel, grav_constant, dt);
 
 	if (decreasing)
 	{
