@@ -63,47 +63,18 @@ custom_math::vector_3 grav_acceleration(const custom_math::vector_3& pos, const 
 
 
 
-
-
-double precision(double f, int places)
-{
-	double n = std::pow(10.0, places);
-	return std::round(f * n) / n;
-}
-
-
 double truncate_normalized_double(const double d)
 {
-	double x = d;// precision(d, 10);
+	float a = d - numeric_limits<float>::epsilon();
+	float b = d + numeric_limits<float>::epsilon();
 
-	return static_cast<double>(static_cast<float>(x));
+	float r1 = abs(d - a);
+	float r2 = abs(d - b);
 
-
-
-//	return static_cast<double>(static_cast<float>(d));
-
-
-
-
-	if (d <= 0.0)
-		return 0.0f;
-	else if (d >= 1.0)
-		return 1.0f;
-
-	ostringstream oss;
-	oss << std::fixed << setprecision(9) << d;
-
-	float df = 0;
-
-	istringstream iss(oss.str());
-	iss >> df;
-
-	float tempf = nexttowardf(1.0f, df);
-
-	while (tempf > df)
-		tempf = nexttowardf(tempf, df);
-
-	return static_cast<double>(tempf);
+	if (r1 < r2)
+		return static_cast<double>(a);
+	else
+		return static_cast<double>(b);
 }
 
 
@@ -202,12 +173,7 @@ void proceed_Euler(custom_math::vector_3& pos, custom_math::vector_3& vel, const
 
 	const double beta = sqrt(1.0 - Rs / distance);
 
-	const float beta_float = static_cast<float>(beta);
 	const double beta_truncated = truncate_normalized_double(beta);
-
-	if (beta_float != beta_truncated)
-		cout << "mismatch" << endl;
-
 
 	custom_math::vector_3 accel = grav_acceleration(pos, vel, G);
 
@@ -216,14 +182,12 @@ void proceed_Euler(custom_math::vector_3& pos, custom_math::vector_3& vel, const
 }
 
 
-long double total = 0;
 long unsigned int frame_count = 0;
 
 void idle_func(void)
 {
 	frame_count++;
 
-	const long double dt = 0.1;
 	 
 	custom_math::vector_3 last_pos = mercury_pos;
 
@@ -247,9 +211,9 @@ void idle_func(void)
 	}
 	else
 	{
-		if (mercury_pos.length() > last_pos.length()
-			&&
-			mercury_pos.length() > next_pos.length()
+		if (mercury_pos.length() < last_pos.length()
+		//	&&
+		//	mercury_pos.length() > next_pos.length()
 			&& frame_count > 1)
 		{
 			// hit aphelion
@@ -257,7 +221,7 @@ void idle_func(void)
 
 			orbit_count++;
 
-			custom_math::vector_3 current_dir = mercury_pos;
+			custom_math::vector_3 current_dir = last_pos;
 			current_dir.normalize();
 
 			const long double d = current_dir.dot(previous_dir);
@@ -265,25 +229,14 @@ void idle_func(void)
 			const long double angle = acos(d);
 			previous_dir = current_dir;
 
-			custom_math::vector_3 temp_pos = mercury_pos;
-			temp_pos.rotate_z(-total);
-
-			if (temp_pos.x < 0)
-				total += angle;
-			else
-				total -= angle;
-
-			const long double avg = total / orbit_count;
-
 			static const long double num_orbits_per_earth_century = 365.0 / 88.0 * 100;
 			static const long double to_arcseconds = 1.0 / (pi / (180.0 * 3600.0));
 
 			cout << "orbit " << orbit_count << endl;
 			cout << "dot   " << d << endl;
-			cout << "total " << total * num_orbits_per_earth_century * to_arcseconds << endl;
 			cout << "angle " << angle * num_orbits_per_earth_century * to_arcseconds << endl;
 			cout << "delta " << delta * num_orbits_per_earth_century * to_arcseconds << endl;
-			cout << "avg   " << avg * num_orbits_per_earth_century * to_arcseconds << endl;
+			
 
 			cout << endl;
 

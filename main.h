@@ -19,6 +19,10 @@
 
 vector<custom_math::vector_3> positions;
 
+const long double dt = 0.1;
+
+
+
 custom_math::vector_3 background_colour(0.0f, 0.0f, 0.0f);
 custom_math::vector_3 control_list_colour(1.0f, 1.0f, 1.0f);
 
