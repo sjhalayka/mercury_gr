@@ -195,7 +195,7 @@ void idle_func(void)
 {
 	frame_count++;
 
-	const long double dt = 0.1;// 5e-6 * (speed_of_light / mercury_vel.length());
+	const long double dt = 0.1;
 
 	custom_math::vector_3 last_pos = mercury_pos;
 
