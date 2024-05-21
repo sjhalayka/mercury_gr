@@ -19,7 +19,7 @@
 
 vector<custom_math::vector_3> positions;
 
-const long double dt = 0.01;
+const long double dt = 0.1;
 
 
 

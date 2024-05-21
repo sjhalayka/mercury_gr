@@ -62,24 +62,54 @@ custom_math::vector_3 grav_acceleration(const custom_math::vector_3& pos, const 
 }
 
 
+//
+//double truncate_normalized_double(const double d)
+//{
+//	float a = d - numeric_limits<float>::epsilon();
+//	float b = d + numeric_limits<float>::epsilon();
+//
+//	float r1 = abs(d - a);
+//	float r2 = abs(d - b);
+//
+//	if (r1 < r2)
+//		return static_cast<double>(a);
+//	else
+//		return static_cast<double>(b);
+//}
+//
+
+//
+//double truncate_normalized_double(const double d)
+//{
+//	float num = 1;
+//
+//	while (num >= d)
+//		num -= numeric_limits<float>::epsilon();
+//
+//	if (num < 0)
+//		num = 0;
+//
+//	return num;
+//}
 
 double truncate_normalized_double(const double d)
 {
-	float a = d - numeric_limits<float>::epsilon();
-	float b = d + numeric_limits<float>::epsilon();
+//	return static_cast<double>(static_cast<float>(d));
 
-	float r1 = abs(d - a);
-	float r2 = abs(d - b);
+	if (d <= 0.0)
+		return 0.0f;
+	else if (d >= 1.0)
+		return 1.0f;
 
-	if (r1 < r2)
-		return static_cast<double>(a);
-	else
-		return static_cast<double>(b);
+	float df = d;
+
+	float tempf = nexttowardf(1.0f, df);
+
+	while (tempf > df)
+		tempf = nexttowardf(tempf, df);
+
+	return static_cast<double>(tempf);
 }
-
-
-
-
 
 void proceed_symplectic4(custom_math::vector_3& pos, custom_math::vector_3& vel, long double G, long double dt)
 {
@@ -187,17 +217,16 @@ long unsigned int frame_count = 0;
 void idle_func(void)
 {
 	frame_count++;
-
 	 
 	custom_math::vector_3 last_pos = mercury_pos;
 
-	proceed_Euler(mercury_pos, mercury_vel, grav_constant, dt);
-	//proceed_symplectic4(mercury_pos, mercury_vel, grav_constant, dt);
+	//proceed_Euler(mercury_pos, mercury_vel, grav_constant, dt);
+	proceed_symplectic4(mercury_pos, mercury_vel, grav_constant, dt);
 
 	custom_math::vector_3 next_pos = mercury_pos;
 	custom_math::vector_3 next_vel = mercury_vel;
-	proceed_Euler(next_pos, next_vel, grav_constant, dt);
-	//proceed_symplectic4(next_pos, next_vel, grav_constant, dt);
+	//proceed_Euler(next_pos, next_vel, grav_constant, dt);
+	proceed_symplectic4(next_pos, next_vel, grav_constant, dt);
 
 	if (decreasing)
 	{
