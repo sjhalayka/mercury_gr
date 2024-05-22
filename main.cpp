@@ -7,6 +7,8 @@
 #include "main.h"
 
 #include <string>
+#include <iomanip>
+#include <bitset>
 using std::to_string;
 
 int main(int argc, char** argv)
@@ -91,25 +93,113 @@ custom_math::vector_3 grav_acceleration(const custom_math::vector_3& pos, const 
 //
 //	return num;
 //}
+//
+//
+//double round6(double x) {
+//	return std::round(x * 1e4) / 1e4;
+//}
+//
+//	
+//double truncate_normalized_double(double d)
+//{
+//	if (d <= 0.0)
+//		return 0.0f;
+//	else if (d >= 1.0)
+//		return 1.0f;
+//
+//	double result = 0;
+//	int exponent = 0;
+//	double s = signbit(d);
+//
+//	result = frexp(d, &exponent);
+//
+//	const double d_final = result * pow(2.0, static_cast<double>(exponent));
+//
+//	return copysign(d_final, s);
+//}
 
-double truncate_normalized_double(const double d)
+
+#include <bitset>
+#include <iostream>
+#include <string>
+
+
+
+double truncate_normalized_double(double d)
 {
-//	return static_cast<double>(static_cast<float>(d));
+	return static_cast<double>(static_cast<float>(d));
 
-	if (d <= 0.0)
-		return 0.0f;
-	else if (d >= 1.0)
-		return 1.0f;
+	string s = "";
 
-	float df = d;
+	for (int i = 63; i >= 0; i--)
+	{
+		if (i <= 23)
+			s += "0";
+		else
+			s += to_string((reinterpret_cast<uint64_t&>(d) >> i) & 1);
+	}
 
-	float tempf = nexttowardf(1.0f, df);
+	std::bitset<64> Bitset64(s);
 
-	while (tempf > df)
-		tempf = nexttowardf(tempf, df);
+	uint64_t value = Bitset64.to_ullong();
 
-	return static_cast<double>(tempf);
+	return reinterpret_cast<double&>(value);
+
+//	std::cout << d << endl <<  << endl;
+
+
+	//cout << s << endl;
+
+//	cout << endl;
+//	cout << endl;
+
+
+
+	//const int64_t mantissa_size = 52;
+	//uint64_t max = static_cast<uint64_t>(-1); // 2^64 - 1
+
+	//uint64_t bits = reinterpret_cast<uint64_t&>(d);
+
+
+
+
+
+
+
+
+	//bits = bits & (max << 23);
+	//d = reinterpret_cast<double&>(bits);
+	////cout << d << endl;
+
+	//return d;
 }
+
+
+
+
+//
+//double truncate_normalized_double(const double d)
+//{
+//	//return static_cast<float>(round6(d));
+//
+//
+//
+////	return static_cast<double>(static_cast<float>(d));
+//
+//	if (d <= 0.0)
+//		return 0.0f;
+//	else if (d >= 1.0)
+//		return 1.0f;
+//
+//	float df = static_cast<float>(d);
+//
+//	float tempf = nexttowardf(1.0f, df);
+//
+//	while (tempf > df)
+//		tempf = nexttowardf(tempf, df);
+//
+//	return static_cast<double>(tempf);
+//}
 
 void proceed_symplectic4(custom_math::vector_3& pos, custom_math::vector_3& vel, long double G, long double dt)
 {
