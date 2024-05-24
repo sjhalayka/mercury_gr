@@ -125,55 +125,235 @@ custom_math::vector_3 grav_acceleration(const custom_math::vector_3& pos, const 
 
 
 
-double truncate_normalized_double(double d)
-{
-	return static_cast<double>(static_cast<float>(d));
+//
+//
+//double truncate_normalized_double(double d)
+//{
+//	if (d <= 0.0)
+//		return 0.0;
+//	else if (d >= 1.0)
+//		return 1.0;
+//
+//	//return static_cast<double>(static_cast<float>(d));
+//
+//	//string s;
+//	//get_double_bit_string(d, s);
+//	//cout << s << endl;
+//
+//	const int64_t mantissa_size = 52;
+//	uint64_t max = static_cast<uint64_t>(-1); // 2^64 - 1
+//
+//	uint64_t bits = reinterpret_cast<uint64_t&>(d);
+//	bits = bits & (max << 30);
+//	double reduced = reinterpret_cast<double&>(bits);
+//
+//	//get_double_bit_string(reduced, s);
+//	//cout << s << endl;
+//
+//	//double df = static_cast<double>(static_cast<float>(d));
+//	//string sdf = "";
+//	//get_double_bit_string(df, sdf);
+//	//cout << sdf << endl;
+//
+//	return reduced;
+//}
 
-	string s = "";
+
+
+/*
+size_t get_first_one_from_right(const string& s)
+{
+	bool found_one = false;
+
+	signed long long int i = 0;
+
+	signed long long int ssize = s.size() - 1;
+
+
+	for (i = ssize; i >= 0; i--)
+	{
+		if (s[i] == '1')
+		{
+			return i;
+		}
+	}
+
+	return i;
+
+	//	cout << endl;
+
+}
+
+
+size_t get_last_one_from_right(const string& s)
+{
+	bool found_one = false;
+
+	signed long long int i = 0;
+
+	signed long long int ssize = s.size() - 1;
+
+
+	for (i = ssize; i >= 0; i--)
+	{
+		if (found_one == false)
+		{
+			if (s[i] == '1')
+			{
+				if (i == ssize)
+					return ssize;
+
+				found_one = true;
+			}
+		}
+		else
+		{
+			if (s[i] == '0')
+			{
+				i++;
+				break;
+			}
+		}
+	}
+
+	return i;
+
+	//	cout << endl;
+
+}
+
+
+void get_truncated_bit_string(double d, string& s)
+{
+	s = "";
 
 	for (int i = 63; i >= 0; i--)
 	{
-		if (i <= 23)
-			s += "0";
+		if (i <= 27)
+			s += '0';
 		else
 			s += to_string((reinterpret_cast<uint64_t&>(d) >> i) & 1);
 	}
+}
 
-	std::bitset<64> Bitset64(s);
+void get_double_bit_string(double d, string& s)
+{
+	s = "";
+
+	for (int i = 63; i >= 0; i--)
+		s += to_string((reinterpret_cast<uint64_t&>(d) >> i) & 1);
+}
+
+
+double truncate_normalized_double(double d)
+{
+	if (d <= 0.0)
+		return 0.0;
+	else if (d >= 1.0)
+		return 1.0;
+
+	return static_cast<double>(static_cast<float>(d));
+
+	string sd = "";
+	get_double_bit_string(d, sd);
+	//cout << sd << endl;
+
+	std::bitset<64> Bitset64(sd);
 
 	uint64_t value = Bitset64.to_ullong();
 
-	return reinterpret_cast<double&>(value);
+	double dv = reinterpret_cast<double&>(value);
+	string sdv = "";
+	get_truncated_bit_string(dv, sdv);
 
-//	std::cout << d << endl <<  << endl;
+	size_t st = get_last_one_from_right(sdv) - 1;
+
+	size_t st_first = get_first_one_from_right(sdv);
+
+	if (st_first != st)
+	{
+		size_t st = get_last_one_from_right(sdv) - 1;
+
+		sdv[st] = '1';
+
+		for (size_t i = st + 1; i < sdv.size(); i++)
+			sdv[i] = '0';
+	}
+
+	std::bitset<64> Bitset64sdv(sdv);
+	value = Bitset64sdv.to_ullong();
+	dv = reinterpret_cast<double&>(value);
+	//cout << sdv << endl;
 
 
-	//cout << s << endl;
-
-//	cout << endl;
-//	cout << endl;
 
 
+	//double df = static_cast<double>(static_cast<float>(d));
+	//string sdf = "";
+	//get_double_bit_string(df, sdf);
+	////cout << sdf << endl;
 
-	//const int64_t mantissa_size = 52;
-	//uint64_t max = static_cast<uint64_t>(-1); // 2^64 - 1
-
-	//uint64_t bits = reinterpret_cast<uint64_t&>(d);
-
-
-
-
-
-
-
-
-	//bits = bits & (max << 23);
-	//d = reinterpret_cast<double&>(bits);
-	////cout << d << endl;
-
-	//return d;
+	return dv;
 }
 
+
+*/
+
+
+
+
+
+
+//
+//double truncate_normalized_double(double d)
+//{
+//	//return static_cast<double>(static_cast<float>(d));
+//
+//	string s = "";
+//
+//	for (int i = 63; i >= 0; i--)
+//	{
+//		if (i <= 23)
+//			s += "0";
+//		else
+//			s += to_string((reinterpret_cast<uint64_t&>(d) >> i) & 1);
+//	}
+//
+//	std::bitset<64> Bitset64(s);
+//
+//	uint64_t value = Bitset64.to_ullong();
+//
+//	return reinterpret_cast<double&>(value);
+//
+////	std::cout << d << endl <<  << endl;
+//
+//
+//	//cout << s << endl;
+//
+////	cout << endl;
+////	cout << endl;
+//
+//
+//
+//	//const int64_t mantissa_size = 52;
+//	//uint64_t max = static_cast<uint64_t>(-1); // 2^64 - 1
+//
+//	//uint64_t bits = reinterpret_cast<uint64_t&>(d);
+//
+//
+//
+//
+//
+//
+//
+//
+//	//bits = bits & (max << 23);
+//	//d = reinterpret_cast<double&>(bits);
+//	////cout << d << endl;
+//
+//	//return d;
+//}
+//
 
 
 
@@ -200,6 +380,282 @@ double truncate_normalized_double(double d)
 //
 //	return static_cast<double>(tempf);
 //}
+
+
+
+
+
+
+
+
+
+//
+//void get_truncated_bit_string(double d, string& s)
+//{
+//	s = "";
+//
+//	for (int i = 63; i >= 0; i--)
+//	{
+//		if (i <= 31)
+//			s += '0';
+//		else
+//			s += to_string((reinterpret_cast<uint64_t&>(d) >> i) & 1);
+//	}
+//}
+//
+//void get_double_bit_string(double d, string& s)
+//{
+//	s = "";
+//
+//	for (int i = 63; i >= 0; i--)
+//		s += to_string((reinterpret_cast<uint64_t&>(d) >> i) & 1);
+//}
+//
+//
+//double truncate_normalized_double(double d)
+//{
+//	//return static_cast<double>(static_cast<float>(d));
+//
+//	double value = d;
+//	uint64_t bits = (uint64_t&)value;
+//		bits = bits & 0b1111111111111111111111111111111110000000000000000000000000000000ull;
+//
+//	double truncated = (double&)bits;
+//
+//	return truncated;
+//
+//
+//
+//
+//
+//
+////	string sd = "";
+////	get_double_bit_string(truncated, sd);
+////	cout << sd << endl;
+//
+//
+//
+//
+//	//std::bitset<64> Bitset64(sd);
+//
+//	//uint64_t value = Bitset64.to_ullong();
+//
+//	//double dv = reinterpret_cast<double&>(value);
+//	//string sdv = "";
+//	//get_truncated_bit_string(dv, sdv);
+//	//cout << sdv << endl;
+//
+//
+//
+//
+////double df = static_cast<double>(static_cast<float>(d));
+//	//string sdf = "";
+//	//get_double_bit_string(df, sdf);
+////	cout << sdf << endl;
+//
+//	return truncated;
+//}
+//
+//
+//
+
+
+
+
+
+
+
+
+
+//
+//
+//
+//void get_truncated_bit_string(double d, string& s)
+//{
+//	s = "";
+//
+//	for (int i = 63; i >= 0; i--)
+//	{
+//		if (i <= 30)
+//		{
+//			if (i == 30)
+//				s += '1';
+//			else
+//				s += '0';
+//		}
+//		else
+//			s += to_string((reinterpret_cast<uint64_t&>(d) >> i) & 1);
+//	}
+//}
+//
+//void get_double_bit_string(double d, string& s)
+//{
+//	s = "";
+//
+//	for (int i = 63; i >= 0; i--)
+//		s += to_string((reinterpret_cast<uint64_t&>(d) >> i) & 1);
+//}
+//
+//
+//double truncate_normalized_double(double d)
+//{
+//	if (d <= 0)
+//		return 0;
+//	
+//	if (d >= 1)
+//		return 1;
+//
+//	//return static_cast<double>(static_cast<float>(d));
+//
+//	string sd = "";
+//	get_double_bit_string(d, sd);
+//	//cout << sd << endl;
+//
+//	std::bitset<64> Bitset64(sd);
+//
+//	uint64_t value = Bitset64.to_ullong();
+//
+//	double dv = reinterpret_cast<double&>(value);
+//	string sdv = "";
+//	get_truncated_bit_string(dv, sdv);
+////	cout << sdv << endl;
+//
+//	//double df = static_cast<double>(static_cast<float>(d));
+//	//string sdf = "";
+//	//get_double_bit_string(df, sdf);
+//	//cout << sdf << endl;
+//
+//	return dv;
+//}
+//
+//
+//
+
+
+
+
+
+
+
+
+
+//
+//
+//double truncate_normalized_double(double d)
+//{
+//	if (d <= 0.0)
+//		return 0.0;
+//	else if (d >= 1.0)
+//		return 1.0;
+//
+//	//////return static_cast<double>(static_cast<float>(d));
+//
+//
+//
+//	static int shift = 52 - 23;
+//
+//	//double ref = static_cast<double>(static_cast<float>(d));
+//
+////	cout << ref << endl;
+//
+//	//string s = "";
+//	//get_double_bit_string(ref, s);
+//	//cout << s << endl;
+//
+//	uint64_t max = -1;
+//
+//	uint64_t bits = (uint64_t&)d;
+//	bits = bits & (uint64_t(max << shift));
+//	double emu = (double&)bits;
+//
+//	//	cout << emu << endl;
+//
+//	//	s = "";
+//	//	get_double_bit_string(emu, s);
+//	//	cout << s << endl;
+//
+//	return emu;
+//}
+
+
+
+
+
+
+
+//
+//double truncate_normalized_double(double d)
+//{
+//	if (d <= 0.0)
+//		return 0.0;
+//	else if (d >= 1.0)
+//		return 1.0;
+//
+//	////return static_cast<double>(static_cast<float>(d));
+//
+//	uint64_t shift = static_cast<uint64_t>(52) - static_cast<uint64_t>(23);
+//	uint64_t max = static_cast<uint64_t>(-1);
+//
+//	uint64_t bits = (uint64_t&)d;
+//	bits = bits & (uint64_t(max << shift));
+//	double emu = (double&)bits;
+//
+//	return emu;
+//}
+
+
+
+
+//
+//double truncate_normalized_double(double d)
+//{
+//	if (d <= 0.0)
+//		return 0.0;
+//	else if (d >= 1.0)
+//		return 1.0;
+//
+//	//////return static_cast<double>(static_cast<float>(d));
+//
+//	float f = static_cast<float>(d);
+//
+//	float tempf = nexttowardf(1.0f, f);
+//
+//	while (tempf > f)
+//		tempf = nexttowardf(tempf, f);
+//
+//	return static_cast<double>(tempf);
+//}
+//
+//
+//
+//
+//
+
+
+
+
+
+
+double truncate_normalized_double(double d)
+{
+	if (d <= 0.0)
+		return 0.0;
+	else if (d >= 1.0)
+		return 1.0;
+
+	static const long long signed int mantissa_bits = 23;
+
+	static const double epsilon = pow(2, -mantissa_bits);
+	const double remainder = fmod(d, epsilon);
+
+	d = nexttowardf(d, d - remainder);
+
+	return d;
+}
+
+
+
+
 
 void proceed_symplectic4(custom_math::vector_3& pos, custom_math::vector_3& vel, long double G, long double dt)
 {
@@ -289,7 +745,7 @@ void proceed_Euler(custom_math::vector_3& pos, custom_math::vector_3& vel, const
 	const double distance = grav_dir.length();
 	const double Rs = 2 * grav_constant * sun_mass / (speed_of_light * speed_of_light);
 
-	const double alpha = 2.0 - sqrt(1 - (vel.length() * vel.length()) / (speed_of_light * speed_of_light));
+	double alpha = 2.0 - sqrt(1 - (vel.length() * vel.length()) / (speed_of_light * speed_of_light));
 
 	const double beta = sqrt(1.0 - Rs / distance);
 
@@ -346,6 +802,10 @@ void idle_func(void)
 			const long double d = current_dir.dot(previous_dir);
 
 			const long double angle = acos(d);
+
+			if (isnan(angle))
+				cout << "nan" << endl;
+
 			previous_dir = current_dir;
 
 			static const long double num_orbits_per_earth_century = 365.0 / 88.0 * 100;
